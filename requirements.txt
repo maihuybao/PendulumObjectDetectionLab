@@ -1,0 +1,8 @@
+PyQt5
+numpy
+pygrabber
+scipy
+ultralytics
+collections
+matplotlib
+cv2
