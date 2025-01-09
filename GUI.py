@@ -148,7 +148,7 @@ class CVApp(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('UI.ui', self)
-        self.setWindowTitle("CV2 Application with GUI")
+        self.setWindowTitle("Pendulum Object Detection Lab")
         self.setFixedSize(982, 887)
         self.pause = False
         # ComboBox để chọn nguồn
