@@ -2,13 +2,8 @@ import sys
 import cv2
 import numpy as np
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import (
-    QApplication,
-    QMainWindow,
-    QFileDialog,
-    QMessageBox
-)
-from matplotlib.figure import Figure
+from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
+
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import time
@@ -29,8 +24,7 @@ length = 0
 data_calculate = []
 
 
-def get_available_cameras() :
-
+def get_available_cameras():
     devices = FilterGraph().get_input_devices()
 
     available_cameras = {}
@@ -40,10 +34,8 @@ def get_available_cameras() :
 
     return available_cameras
 
+
 # exit(get_available_cameras())
-
-
-
 
 
 # Hàm tính góc giữa sợi dây và trục Oy (góc giữa sợi dây và trục Y)
@@ -78,6 +70,9 @@ def calculate_f(length):
 def calculate_phase(length, time):
     return round(time / calculate_T(length), 2)
 
+def degree_to_radian(degree):
+
+    return round(degree * np.pi / 180, 2)  # degree * np.pi / 180
 
 # Hàm vẽ hệ trục tọa độ với đơn vị tăng dần, trục tọa độ di chuyển theo điểm gắn dây
 # Hàm vẽ hệ trục tọa độ với trục Ox và Oy cắt nhau tại điểm (0, 0)
@@ -102,16 +97,16 @@ def draw_coordinate_system(frame, pivot_position, max_amplitude, scale=30):
             frame, (i, pivot_position[1] - 5), (i, pivot_position[1] + 5), (0, 0, 0), 1
         )
         # Tính toán giá trị theo trục X, bắt đầu từ pivot_position[0]
-        x_value = (i - pivot_position[0]) // scale
-        cv2.putText(
-            frame,
-            f"{x_value}",
-            (i, pivot_position[1] + 20),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.5,
-            (0, 0, 0),
-            1,
-        )
+        # x_value = (i - pivot_position[0]) // scale
+        # cv2.putText(
+        #     frame,
+        #     f"{x_value}",
+        #     (i, pivot_position[1] + 20),
+        #     cv2.FONT_HERSHEY_SIMPLEX,
+        #     0.5,
+        #     (0, 0, 0),
+        #     1,
+        # )
 
     for i in range(0, height, scale):  # Trục Y
         # Điều chỉnh vẽ vạch chia trục Y
@@ -119,16 +114,16 @@ def draw_coordinate_system(frame, pivot_position, max_amplitude, scale=30):
             frame, (pivot_position[0] - 5, i), (pivot_position[0] + 5, i), (0, 0, 0), 1
         )
         # Tính toán giá trị theo trục Y, bắt đầu từ pivot_position[1]
-        y_value = (pivot_position[1] - i) // scale
-        cv2.putText(
-            frame,
-            f"{y_value}",
-            (pivot_position[0] + 10, i),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.5,
-            (0, 0, 0),
-            1,
-        )
+        # y_value = (pivot_position[1] - i) // scale
+        # cv2.putText(
+        #     frame,
+        #     f"{y_value}",
+        #     (pivot_position[0] + 10, i),
+        #     cv2.FONT_HERSHEY_SIMPLEX,
+        #     0.5,
+        #     (0, 0, 0),
+        #     1,
+        # )
 
 
 # Biến toàn cục để lưu điểm gắn dây và quỹ đạo
@@ -141,13 +136,10 @@ max_angle = -999  # Biến lưu góc lớn nhất, khởi tạo với giá trị
 paused = True  # Video sẽ tạm dừng cho đến khi chọn điểm gắn dây
 
 
-
-
-
 class CVApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi('UI.ui', self)
+        uic.loadUi("UI.ui", self)
         self.setWindowTitle("Pendulum Object Detection Lab")
         self.setFixedSize(982, 887)
         self.pause = False
@@ -156,63 +148,84 @@ class CVApp(QMainWindow):
         combo = ["Video File"]
         for i in list_webcam:
             combo.append(f"Webcam {i} : {list_webcam[i]}")
+        self.prev_frame_time = 0
 
-        #plt
+        # used to record the time at which we processed current frame
+        self.new_frame_time = 0
+
+        # plt
         self.figure = plt.Figure()
         self.canvas = FigureCanvas(self.figure)
-  
+
         # this is the Navigation widget
         # it takes the Canvas widget and a parent
         self.toolbar = NavigationToolbar(self.canvas, self)
 
-
-
-
-        #xàm
+        # xàm
         self.status_bar = self.statusBar()
         self.status_bar.addWidget(QtWidgets.QLabel("Trường THPT Lộc Thái"))
-        self.status_bar.addPermanentWidget(QtWidgets.QLabel("Mai Huy Bảo - 12A4 - 2024"))
-
-
+        self.status_bar.addPermanentWidget(
+            QtWidgets.QLabel("Mai Huy Bảo - 12A4 - 2024")
+        )
 
         # source controller
-        self.source_combo = self.findChild(QtWidgets.QComboBox,"source_combo")
-        self.load_button = self.findChild(QtWidgets.QPushButton,"load_button")
-        self.path_source = self.findChild(QtWidgets.QLineEdit,"path_source")
-        self.pick_source_button = self.findChild(QtWidgets.QToolButton,"pick_source_button")
+        self.source_combo = self.findChild(QtWidgets.QComboBox, "source_combo")
+        self.load_button = self.findChild(QtWidgets.QPushButton, "load_button")
+        self.path_source = self.findChild(QtWidgets.QLineEdit, "path_source")
+        self.pick_source_button = self.findChild(
+            QtWidgets.QToolButton, "pick_source_button"
+        )
         self.source_combo.currentIndexChanged.connect(self.on_combobox_change)
         self.pick_source_button.setDisabled(False)
         self.path_source.setDisabled(True)
-        #video controller
-        self.set_pivot_button = self.findChild(QtWidgets.QPushButton,"set_pivot_button")
-        self.reset_pivot_button = self.findChild(QtWidgets.QPushButton,"reset_pivot_button")
-        self.input_x = self.findChild(QtWidgets.QLineEdit,"input_x")
-        self.input_y = self.findChild(QtWidgets.QLineEdit,"input_y")
+        # video controller
+        self.set_pivot_button = self.findChild(
+            QtWidgets.QPushButton, "set_pivot_button"
+        )
+        self.reset_pivot_button = self.findChild(
+            QtWidgets.QPushButton, "reset_pivot_button"
+        )
+        self.input_x = self.findChild(QtWidgets.QLineEdit, "input_x")
+        self.input_y = self.findChild(QtWidgets.QLineEdit, "input_y")
+        self.input_length = self.findChild(QtWidgets.QLineEdit, "input_length")
         self.input_x.setText("0")
         self.input_y.setText("0")
-        #action controller
-        self.start_button = self.findChild(QtWidgets.QPushButton,"start_button")
-        self.stop_button = self.findChild(QtWidgets.QPushButton,"stop_button")
-        self.analyse_button = self.findChild(QtWidgets.QPushButton,"analyse_button")
-        #model group
-        self.load_model_button = self.findChild(QtWidgets.QPushButton,"load_model_button")
-        self.path_model_input = self.findChild(QtWidgets.QLineEdit,"path_model_input")
+        self.input_length.setText("0")
+        # action controller
+        self.start_button = self.findChild(QtWidgets.QPushButton, "start_button")
+        self.stop_button = self.findChild(QtWidgets.QPushButton, "stop_button")
+        self.analyse_button = self.findChild(QtWidgets.QPushButton, "analyse_button")
+        self.exportcsv_button = self.findChild(QtWidgets.QPushButton, "exportcsv_button")
+        # model group
+        self.load_model_button = self.findChild(
+            QtWidgets.QPushButton, "load_model_button"
+        )
+        self.path_model_input = self.findChild(QtWidgets.QLineEdit, "path_model_input")
         self.path_model_input.setText("models/default.pt")
-        self.pick_model_button_2 = self.findChild(QtWidgets.QToolButton,"pick_model_button_2")
+        self.pick_model_button = self.findChild(
+            QtWidgets.QToolButton, "pick_model_button"
+        )
+        self.confidence = self.findChild(QtWidgets.QLineEdit, "confidence")
         # source
-        self.video_label = self.findChild(QtWidgets.QLabel,"video_label")
+        self.video_label = self.findChild(QtWidgets.QLabel, "video_label")
         # parameter
-        self.x_parameter = self.findChild(QtWidgets.QLineEdit,"x_parameter")
-        self.y_parameter = self.findChild(QtWidgets.QLineEdit,"y_parameter")
-        self.angle_parameter = self.findChild(QtWidgets.QLineEdit,"angle_parameter")
-        self.length_parameter = self.findChild(QtWidgets.QLineEdit,"length_parameter")
-        self.amplitude_parameter = self.findChild(QtWidgets.QLineEdit,"amplitude_parameter")
+        self.x_parameter = self.findChild(QtWidgets.QLineEdit, "x_parameter")
+        self.y_parameter = self.findChild(QtWidgets.QLineEdit, "y_parameter")
+        self.angle_parameter = self.findChild(QtWidgets.QLineEdit, "angle_parameter")
+        self.length_parameter = self.findChild(QtWidgets.QLineEdit, "length_parameter")
+        self.amplitude_parameter = self.findChild(
+            QtWidgets.QLineEdit, "amplitude_parameter"
+        )
+        self.T_parameter = self.findChild(QtWidgets.QLineEdit,"T_parameter")
+        self.f_parameter = self.findChild(QtWidgets.QLineEdit,"f_parameter")
+        self.ptdd = self.findChild(QtWidgets.QLabel,"ptdd")
 
 
-        
+
+
         self.source_combo.addItems(combo)
         self.pick_source_button.clicked.connect(self.pick_source)
-        self.pick_model_button_2.clicked.connect(self.pick_model)
+        self.pick_model_button.clicked.connect(self.pick_model)
         self.set_pivot_button.clicked.connect(self.set_pivot)
         self.reset_pivot_button.clicked.connect(self.reset_pivot)
         self.load_button.clicked.connect(self.load_source)
@@ -223,11 +236,8 @@ class CVApp(QMainWindow):
         self.load_model_button.clicked.connect(self.load_model)
         self.analyse_button.clicked.connect(self.analyse_video)
 
-
-
-
-        #graph
-        self.graph_layout = self.findChild(QtWidgets.QVBoxLayout,"graph_layout")
+        # graph
+        self.graph_layout = self.findChild(QtWidgets.QVBoxLayout, "graph_layout")
         self.graph_layout.addWidget(self.toolbar)
 
         self.graph_layout.addWidget(self.canvas)
@@ -235,10 +245,10 @@ class CVApp(QMainWindow):
         # start yolo
         self.model = YOLO(self.path_model_input.text())
 
-
-
         self.current_frame = None
-        #default var
+        # default var
+        self.csv_logger = []
+        self.isPicked = False
         self.current_time = 0
         self.video_width = 0
         self.video_height = 0
@@ -251,10 +261,13 @@ class CVApp(QMainWindow):
         self.data_calculate = []
         self.paused = True
         self.pivot_position = None
+        self.ratio = 1
+        self.angle_begin = 0
         # OpenCV variables
         self.cap = None
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_frame)
+
     def reset_pivot(self):
         self.pivot_position = (0, 0)
         self.input_x.setText("0")
@@ -270,22 +283,31 @@ class CVApp(QMainWindow):
         self.trajectory_data.clear()
         self.data_calculate.clear()
         self.max_angle = 0
+        self.angle_begin = 0
+        self.input_length.setText("0")
         self.update_frame(update=not self.start_button.isEnabled())
+
     def analyse_video(self):
-        print(self.trajectory_data)
+        if len(self.trajectory_data) < 11:
+            self.show_message(
+                "Infomation", "Not enough data to analyze!", QMessageBox.Warning
+            )
         if self.trajectory_data:
-            print(f"Góc lớn nhất: {self.max_angle:.2f} độ")
-            # biên độ
-            print(f"Biên độ lớn nhất: {self.max_amplitude:.2f} đơn vị")
+            # print(f"Góc lớn nhất: {self.max_angle:.2f} độ")
+            # # biên độ
+            # print(f"Biên độ lớn nhất: {self.max_amplitude:.2f} đơn vị")
 
-            times, x_positions = zip(*self.trajectory_data)  # Tách thời gian và tọa độ X
-
+            times, x_positions = zip(
+                *self.trajectory_data
+            )  # Tách thời gian và tọa độ X
 
             smoothed_times = savgol_filter(times, window_length=11, polyorder=3)
-            smoothed_x_positions = savgol_filter(x_positions, window_length=11, polyorder=3)
+            smoothed_x_positions = savgol_filter(
+                x_positions, window_length=11, polyorder=3
+            )
 
             # Vẽ đồ thị
-            
+
             self.figure.clear()
             self.figure.clf()
             # graph = self.figure(figsize=(10, 6))
@@ -300,8 +322,15 @@ class CVApp(QMainWindow):
                 alpha=0.3,
             )  # Vẽ các điểm dữ liệu gốc
             ax.plot(
-                smoothed_times, smoothed_x_positions, linestyle="-", color="r", label="Đồ thị"
+                smoothed_times,
+                smoothed_x_positions,
+                linestyle="-",
+                color="r",
+                label="Đồ thị",
             )
+            # ax.plot(
+            #     times,x_positions, linestyle="-", color="r", label="Đồ thị"
+            # )
             ax.axhline(y=0, color="black", linewidth=2)  # Vẽ trục X với đường đậm
             ax.axvline(x=0, color="black", linewidth=2)
             ax.set_title("Li độ theo thời gian")
@@ -311,11 +340,17 @@ class CVApp(QMainWindow):
             ax.grid()
             # ax.imshow()
             self.canvas.draw()
+
     def load_model(self):
         self.model = YOLO(self.path_model_input.text())
         if self.model is not None:
-            self.show_message("Infomation", "Loaded PyTorch Object Detection!", QMessageBox.Information)
+            self.show_message(
+                "Infomation",
+                "Loaded PyTorch Object Detection!",
+                QMessageBox.Information,
+            )
             self.load_model_button.setEnabled(False)
+
     def on_combobox_change(self, index):
         # Lấy lựa chọn từ combobox
         selected_text = self.source_combo.currentText()
@@ -326,7 +361,7 @@ class CVApp(QMainWindow):
             self.path_source.setDisabled(True)
             self.pick_source_button.setDisabled(True)
 
-    def detect_objects(self,frame):
+    def detect_objects(self, frame):
         results = self.model(frame)  # Chạy mô hình YOLO
         # Kết quả trả về là một list, truy cập vào các thông tin sau:
         boxes = results[0].boxes.xyxy.cpu().numpy()  # Tọa độ bounding box
@@ -341,17 +376,28 @@ class CVApp(QMainWindow):
         msg_box.setText(message)
         msg_box.setIcon(icon)
         msg_box.exec_()
+
     def pick_source(self):
-        source_path, _ = QFileDialog.getOpenFileName(self, "Select Video File", "", "Video Files (*.mp4 *.avi *.mkv)")
+        source_path, _ = QFileDialog.getOpenFileName(
+            self, "Select Video File", "", "Video Files (*.mp4 *.avi *.mkv)"
+        )
         if source_path:
             self.path_source.setText(source_path)
+
     def pick_model(self):
-        model_path, _ = QFileDialog.getOpenFileName(self, "Select Model File", "", "Model Files (*.pt)")
+        model_path, _ = QFileDialog.getOpenFileName(
+            self, "Select Model File", "", "Model Files (*.pt)"
+        )
         if model_path:
             self.path_model_input.setText(model_path)
-        
+
     def mousePressEvent(self, event):
-        if event.button() == 1 and self.input_x != "0" and self.input_y != "0" and self.cap is not None:  # Left mouse button
+        if (
+            event.button() == 1
+            and self.input_x != "0"
+            and self.input_y != "0"
+            and self.cap is not None
+        ):  # Left mouse button
             # Lấy tọa độ chuột trong video
             mouse_x, mouse_y = event.pos().x() - 300, event.pos().y() - 33
             scale_x = self.video_width / self.video_label.width()
@@ -360,15 +406,22 @@ class CVApp(QMainWindow):
             # Chuyển đổi vị trí chuột trên QLabel thành vị trí chuột trên video
             video_x = int(mouse_x * scale_x)
             video_y = int(mouse_y * scale_y)
-            if video_x < 0 or video_x >= self.video_width or video_y < 0 or video_y >= self.video_height:
-                return # Nếu vị trí chuột nằm ngoài video, thoát sớm
+            if (
+                video_x < 0
+                or video_x >= self.video_width
+                or video_y < 0
+                or video_y >= self.video_height
+            ):
+                return  # Nếu vị trí chuột nằm ngoài video, thoát sớm
             # self.pivot_position = (mouse_x, mouse_y)
             self.pivot_position = (video_x, video_y)
             self.input_x.setText(str(video_x))
             self.input_y.setText(str(video_y))
             print(f"Điểm gắn dây mới: {self.pivot_position}")
             # Thực hiện hành động khi nhấn chuột, ví dụ chọn điểm gắn dây
-            self.update_frame(update=not self.start_button.isEnabled())  # Cập nhật frame mới
+            self.update_frame(
+                update=not self.start_button.isEnabled()
+            )  # Cập nhật frame mới
             print(not self.start_button.isEnabled())
             # reset các thông số
             self.x_parameter.setText("0")
@@ -380,27 +433,38 @@ class CVApp(QMainWindow):
             self.max_amplitude = 0
             self.length = 0
             self.update()  # Cập nhật widget để vẽ lại nếu cần
+
     def load_source(self):
         source_type = self.source_combo.currentText()
-
+        # self.stop_video()
+        if self.cap is not None:
+            self.timer.stop()
+            self.start_button.setEnabled(True)
+            self.stop_button.setEnabled(False)
+            self.start_time = 0
         if "Webcam" in source_type:
             id_webcam = int(source_type.split()[1])
-            self.cap = cv2.VideoCapture(id_webcam,cv2.CAP_DSHOW)  # Sử dụng webcam
+            self.cap = cv2.VideoCapture(id_webcam, cv2.CAP_DSHOW)  # Sử dụng webcam
             self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
             self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 360)
-            
+
         elif source_type == "Video File":
             video_path = self.path_source.text()
             if video_path:
                 self.cap = cv2.VideoCapture(video_path)
                 # scale to 640x360
-                
-                
+
             else:
-                self.show_message("Infomation", "You have not selected a video file!", QMessageBox.Warning)
+                self.show_message(
+                    "Infomation",
+                    "You have not selected a video file!",
+                    QMessageBox.Warning,
+                )
                 return  # Người dùng không chọn file, thoát sớm
         if self.cap is None or not self.cap.isOpened():
-            self.show_message("Infomation", "Unable to open video source", QMessageBox.Warning)
+            self.show_message(
+                "Infomation", "Unable to open video source", QMessageBox.Warning
+            )
             # print()
             self.cap = None
         else:
@@ -417,7 +481,6 @@ class CVApp(QMainWindow):
             self.video_width = int(width * scale)
             self.video_height = int(height * scale)
 
-
             # Cập nhật kích thước của QLabel để vừa với video
             # if source_type == "Video File":
             #     self.video_label.setFixedSize(self.video_width)
@@ -427,33 +490,49 @@ class CVApp(QMainWindow):
             ret, frame = self.cap.read()
             if ret:
                 self.current_frame = frame
-                frame = cv2.resize(frame, (self.video_width, self.video_height),interpolation=cv2.INTER_LINEAR)
+                frame = cv2.resize(
+                    frame,
+                    (self.video_width, self.video_height),
+                    interpolation=cv2.INTER_LINEAR,
+                )
                 frame = self.process_frame(frame, test=True)
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
                 height, width, channels = frame.shape
                 bytes_per_line = channels * width
-                q_image = QImage(frame.data, width, height, bytes_per_line, QImage.Format_RGB888)
+                q_image = QImage(
+                    frame.data, width, height, bytes_per_line, QImage.Format_RGB888
+                )
                 self.video_label.setPixmap(QPixmap.fromImage(q_image))
             # alert to windows
 
             # (f"Đã tải nguồn: {source_type} với kích thước: {width}x{height}")
-            self.show_message("Infomation", "Please select the pivot attachment point before starting!", QMessageBox.Information)
+            self.show_message(
+                "Infomation",
+                "Please select the pivot attachment point before starting!",
+                QMessageBox.Information,
+            )
             self.start_button.setEnabled(True)
 
-    
     def start_video(self):
         if self.input_x.text() == "0" and self.input_y.text() == "0":
-            return self.show_message("Infomation", "Please mark the pivot attachment point!", QMessageBox.Warning)
+            return self.show_message(
+                "Infomation",
+                "Please mark the pivot attachment point!",
+                QMessageBox.Warning,
+            )
         if self.cap is not None:
-            self.timer.start(30)  # 30ms mỗi frame (~33 FPS)
+            self.timer.start(10)  # 30ms mỗi frame (~33 FPS)
             self.start_button.setEnabled(False)
             self.stop_button.setEnabled(True)
             self.start_time = time.time()
             self.current_time = 0
             self.trajectory_data.clear()
         else:
-            self.show_message("Infomation", "Unable to open video source!", QMessageBox.Warning)
+            self.show_message(
+                "Infomation", "Unable to open video source!", QMessageBox.Warning
+            )
+
     def stop_video(self):
         if self.cap is not None:
             self.timer.stop()
@@ -461,10 +540,17 @@ class CVApp(QMainWindow):
             self.stop_button.setEnabled(False)
             self.start_time = 0
         else:
-            self.show_message("Infomation", "Unable to open video source!", QMessageBox.Warning)
+            self.show_message(
+                "Infomation", "Unable to open video source!", QMessageBox.Warning
+            )
+
     def set_pivot(self):
         if self.input_x.text() == "0" and self.input_y.text() == "0":
-            return self.show_message("Infomation", "Please select the pivot attachment point!", QMessageBox.Warning)
+            return self.show_message(
+                "Infomation",
+                "Please select the pivot attachment point!",
+                QMessageBox.Warning,
+            )
         if self.cap is not None:
             self.set_pivot_button.setEnabled(True)
             self.start_time = 0
@@ -475,29 +561,49 @@ class CVApp(QMainWindow):
             self.max_angle = 0
             self.update_frame(update=not self.start_button.isEnabled())
         else:
-            self.show_message("Infomation", "Unable to open video source!", QMessageBox.Warning)
-    def update_frame(self,update = True):
-        print("Status: ", update)
-        if self.cap is not None and self.cap.isOpened():
-            if (update):
+            self.show_message(
+                "Infomation", "Unable to open video source!", QMessageBox.Warning
+            )
 
+    def update_frame(self, update=True):
+        # print("Status: ", update)
+        if self.cap is not None and self.cap.isOpened():
+            if update:
                 ret, frame = self.cap.read()
             else:
                 ret = True
                 frame = self.current_frame
-
+            self.new_frame_time = time.time()
+            fps = 1 / (self.new_frame_time - self.prev_frame_time)
+            self.prev_frame_time = self.new_frame_time
+            fps = str(int(fps))
             if ret:
                 # Xử lý khung hình (nếu cần)
-                frame = cv2.resize(frame, (self.video_width, self.video_height),interpolation=cv2.INTER_LINEAR)
-                processed_frame = self.process_frame(frame)
 
+                frame = cv2.resize(
+                    frame,
+                    (self.video_width, self.video_height),
+                    interpolation=cv2.INTER_LINEAR,
+                )
+                processed_frame = self.process_frame(frame)
+                # cv2.putText(
+                #     processed_frame,
+                #     "FPS: " + fps,
+                #     (7, 70),
+                #     cv2.FONT_HERSHEY_SIMPLEX,
+                #     1,
+                #     (100, 255, 0),
+                #     3,
+                #     cv2.LINE_AA,
+                # )
                 # Chuyển đổi frame từ BGR (OpenCV) sang RGB (PyQt5)
                 frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
-                
-                
+
                 height, width, channels = frame.shape
                 bytes_per_line = channels * width
-                q_image = QImage(frame.data, width, height, bytes_per_line, QImage.Format_RGB888)
+                q_image = QImage(
+                    frame.data, width, height, bytes_per_line, QImage.Format_RGB888
+                )
 
                 # Hiển thị hình ảnh mà không thay đổi kích thước
                 self.video_label.setPixmap(QPixmap.fromImage(q_image))
@@ -505,6 +611,8 @@ class CVApp(QMainWindow):
                 # Dừng video nếu hết khung hình
                 self.stop_video()
                 self.cap.release()
+                self.stop_button.setEnabled(True)
+                self.start_button.setEnabled(True)
 
     def process_frame(self, frame, test=False):
         """
@@ -522,7 +630,7 @@ class CVApp(QMainWindow):
             confidence = confidences[i]
             cls = class_ids[i]
 
-            if confidence > 0.5:  # Lọc ra những bounding box có độ tin cậy cao
+            if confidence > float(self.confidence.text()):  # Lọc ra những bounding box có độ tin cậy cao
                 # Giả sử quả cầu có class_id = 0, bạn có thể thay đổi theo nhu cầu
                 if int(cls) == 0:
                     # Vị trí của quả cầu
@@ -532,21 +640,27 @@ class CVApp(QMainWindow):
                     if pivot_position:
                         angle_y = calculate_angle_y(ball_position, pivot_position)
                         length_measure = calculate_length(ball_position, pivot_position)
-                        if self.length == 0:
+                        if self.length == 0 and length_measure != 0:
                             self.length = length_measure
-                        # Cập nhật góc lớn nhất nếu cần
+                            
+                            self.ratio = float(self.input_length.text()) / self.length
+                        else:
+                            # self.length = float(self.input_length.text())
+                            self.length = float(self.input_length.text())
+                            
+                        # Cập nhật góc lớn nhất nếu =cần
+                        if (self.angle_begin == 0):
+                            self.angle_begin = abs(round(angle_y))
                         self.max_angle = max(self.max_angle, abs(round(angle_y)))
                         self.current_time = round(
                             time.time() - self.start_time, 2
                         )  # Tính thời gian thực (giây)
                         x_position = round(
-                            (ball_position[0] - pivot_position[0]) / 30, 2
+                            (ball_position[0] - pivot_position[0]) * self.ratio, 2
                         )  # X tính theo đơn vị
                         if test == False:
-                            self.trajectory_data.append(
-                                (self.current_time, x_position)
-                            )
-                        print(f"Thời gian: {self.current_time}s, X: {x_position}")
+                            self.trajectory_data.append((self.current_time, x_position))
+                        # print(f"Thời gian: {self.current_time}s, X: {x_position}")
 
                         # Lưu vị trí quả cầu vào danh sách quỹ đạo
                         trajectory_points.append(ball_position)
@@ -596,17 +710,25 @@ class CVApp(QMainWindow):
                 # Hiển thị tọa độ X và Y trên trục tọa độ
                 x_position_unit = (
                     ball_position[0] - pivot_position[0]
-                ) / 30  # Đổi sang đơn vị theo trục X
+                ) * self.ratio    # Đổi sang đơn vị theo trục X
                 self.max_amplitude = max(self.max_amplitude, abs(x_position_unit))
                 y_position_unit = (
                     pivot_position[1] - ball_position[1]
-                ) / 30  # Đổi sang đơn vị theo trục Y
-                print(f"X: {x_position_unit:.2f}, Y: {y_position_unit:.2f}")
+                ) * self.ratio  # Đổi sang đơn vị theo trục Y
+                # print(f"X: {x_position_unit:.2f}, Y: {y_position_unit:.2f}")
                 self.x_parameter.setText(str(f"{x_position_unit:.2f}"))
                 self.y_parameter.setText(str(f"{y_position_unit:.2f}"))
                 self.angle_parameter.setText(str(f"{angle_y:.2f}"))
                 self.length_parameter.setText(str(f"{self.length:.2f}"))
                 self.amplitude_parameter.setText(str(f"{self.max_amplitude:.2f}"))
+                self.T_parameter.setText(str(f"{calculate_T(self.length)}"))
+                self.f_parameter.setText(str(f"{calculate_f(self.length)}"))
+                self.csv_logger.append([self.current_time, x_position,angle_y])
+                ptdd = f"x = {self.max_amplitude:.2f}cos({calculate_angular_speed(self.length)}t + {degree_to_radian(angle_y)})"
+                self.ptdd.setText(ptdd)
+        if len(self.trajectory_data) > 10 and len(self.trajectory_data) % 10 == 0:
+            # self.analyse_video()
+            pass
         return frame
 
 

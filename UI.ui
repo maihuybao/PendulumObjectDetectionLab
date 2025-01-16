@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>962</width>
-    <height>925</height>
+    <height>903</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -41,18 +41,18 @@
       <x>10</x>
       <y>10</y>
       <width>271</width>
-      <height>391</height>
+      <height>406</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QGroupBox" name="groupBox_3">
+      <widget class="QGroupBox" name="groupBox_7">
        <property name="title">
         <string>Model Controller</string>
        </property>
-       <layout class="QGridLayout" name="gridLayout_2">
+       <layout class="QGridLayout" name="gridLayout_9">
         <item row="0" column="0">
-         <widget class="QLabel" name="label_3">
+         <widget class="QLabel" name="label_14">
           <property name="text">
            <string>Model PyTorch:</string>
           </property>
@@ -61,17 +61,31 @@
         <item row="0" column="1">
          <widget class="QLineEdit" name="path_model_input"/>
         </item>
-        <item row="1" column="0" colspan="3">
-         <widget class="QPushButton" name="load_model_button">
+        <item row="0" column="2">
+         <widget class="QToolButton" name="pick_model_button">
           <property name="text">
-           <string>Load Model</string>
+           <string>...</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="2">
-         <widget class="QToolButton" name="pick_model_button_2">
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_15">
           <property name="text">
-           <string>...</string>
+           <string>Confidence</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" colspan="2">
+         <widget class="QLineEdit" name="confidence">
+          <property name="text">
+           <string>0.5</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="3">
+         <widget class="QPushButton" name="load_model_button">
+          <property name="text">
+           <string>Load Model</string>
           </property>
          </widget>
         </item>
@@ -101,6 +115,9 @@
         <item row="1" column="1">
          <widget class="QLineEdit" name="path_source"/>
         </item>
+        <item row="0" column="1" colspan="2">
+         <widget class="QComboBox" name="source_combo"/>
+        </item>
         <item row="1" column="2">
          <widget class="QToolButton" name="pick_source_button">
           <property name="text">
@@ -115,9 +132,6 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1" colspan="2">
-         <widget class="QComboBox" name="source_combo"/>
-        </item>
        </layout>
       </widget>
      </item>
@@ -126,7 +140,7 @@
        <property name="title">
         <string>Video Controller</string>
        </property>
-       <layout class="QGridLayout" name="gridLayout_3">
+       <layout class="QGridLayout" name="gridLayout_4">
         <item row="0" column="0">
          <widget class="QPushButton" name="set_pivot_button">
           <property name="text">
@@ -135,11 +149,24 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="label_4">
           <property name="text">
            <string>X: </string>
           </property>
          </widget>
+        </item>
+        <item row="0" column="2" colspan="2">
+         <widget class="QLineEdit" name="input_x"/>
+        </item>
+        <item row="0" column="4">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Y: </string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5">
+         <widget class="QLineEdit" name="input_y"/>
         </item>
         <item row="1" column="0">
          <widget class="QPushButton" name="reset_pivot_button">
@@ -148,18 +175,15 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QLabel" name="label_2">
+        <item row="1" column="1" colspan="2">
+         <widget class="QLabel" name="label_6">
           <property name="text">
-           <string>Y: </string>
+           <string>Length:</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="2">
-         <widget class="QLineEdit" name="input_y"/>
-        </item>
-        <item row="0" column="2">
-         <widget class="QLineEdit" name="input_x"/>
+        <item row="1" column="3" colspan="3">
+         <widget class="QLineEdit" name="input_length"/>
         </item>
        </layout>
       </widget>
@@ -169,15 +193,16 @@
        <property name="title">
         <string>Action</string>
        </property>
-       <layout class="QGridLayout" name="gridLayout_4">
-        <item row="0" column="1" rowspan="2">
-         <widget class="QPushButton" name="analyse_button">
-          <property name="minimumSize">
-           <size>
-            <width>81</width>
-            <height>51</height>
-           </size>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0">
+         <widget class="QPushButton" name="start_button">
+          <property name="text">
+           <string>Start</string>
           </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="analyse_button">
           <property name="text">
            <string>Analyse</string>
           </property>
@@ -190,10 +215,10 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QPushButton" name="start_button">
+        <item row="1" column="1">
+         <widget class="QPushButton" name="exportcsv_button">
           <property name="text">
-           <string>Start</string>
+           <string>Export CSV</string>
           </property>
          </widget>
         </item>
@@ -243,7 +268,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>410</y>
+      <y>430</y>
       <width>941</width>
       <height>51</height>
      </rect>
@@ -251,7 +276,7 @@
     <property name="title">
      <string>Parameter</string>
     </property>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -261,10 +286,40 @@
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout_6">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_4">
+      <item row="0" column="11">
+       <widget class="QLineEdit" name="angle_parameter">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
-         <string>X:</string>
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="7">
+       <widget class="QLineEdit" name="f_parameter">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="5">
+       <widget class="QLineEdit" name="T_parameter">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="6">
+       <widget class="QLabel" name="label_17">
+        <property name="text">
+         <string>f:</string>
         </property>
        </widget>
       </item>
@@ -275,10 +330,58 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="4">
+       <widget class="QLabel" name="label_13">
+        <property name="text">
+         <string>T:</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="2">
-       <widget class="QLabel" name="label_5">
+       <widget class="QLabel" name="label_16">
         <property name="text">
          <string>Y:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="12">
+       <widget class="QLabel" name="label_18">
+        <property name="text">
+         <string>L:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="9">
+       <widget class="QLineEdit" name="amplitude_parameter">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="10">
+       <widget class="QLabel" name="label_20">
+        <property name="text">
+         <string>α:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="13">
+       <widget class="QLineEdit" name="length_parameter">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="8">
+       <widget class="QLabel" name="label_19">
+        <property name="text">
+         <string>A:</string>
         </property>
        </widget>
       </item>
@@ -292,54 +395,10 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="4">
-       <widget class="QLabel" name="label_7">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_11">
         <property name="text">
-         <string>Amplitude: </string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="5">
-       <widget class="QLineEdit" name="amplitude_parameter">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="6">
-       <widget class="QLabel" name="label_8">
-        <property name="text">
-         <string>Length:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="7">
-       <widget class="QLineEdit" name="length_parameter">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="8">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>Angle:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="9">
-       <widget class="QLineEdit" name="angle_parameter">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string/>
+         <string>X:</string>
         </property>
        </widget>
       </item>
@@ -350,9 +409,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>470</y>
+      <y>490</y>
       <width>941</width>
-      <height>411</height>
+      <height>421</height>
      </rect>
     </property>
     <property name="title">
@@ -364,11 +423,33 @@
        <x>10</x>
        <y>20</y>
        <width>921</width>
-       <height>381</height>
+       <height>391</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="graph_layout"/>
     </widget>
+   </widget>
+   <widget class="QLabel" name="ptdd">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>410</y>
+      <width>661</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="contextMenuPolicy">
+     <enum>Qt::NoContextMenu</enum>
+    </property>
+    <property name="toolTipDuration">
+     <number>-3</number>
+    </property>
+    <property name="text">
+     <string>Phương trình dao động sẽ được hiển thị ở đây</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

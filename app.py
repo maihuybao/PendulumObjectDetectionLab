@@ -8,7 +8,7 @@ from scipy.signal import savgol_filter
 from math import sqrt
 
 # Tải mô hình YOLO của bạn (v11.pt)
-model = YOLO("v11.pt")
+model = YOLO("models/default.pt")
 trajectory_data = []
 length = 0
 data_calculate = []
@@ -129,8 +129,8 @@ def set_pivot(event, x, y, flags, param):
 
 
 # Sử dụng webcam số 2 (thay vì file video)
-# cap = cv2.VideoCapture(2)  # Thay đổi nếu cần
-cap = cv2.VideoCapture("images/0107.mp4")
+cap = cv2.VideoCapture(2)  # Thay đổi nếu cần
+# cap = cv2.VideoCapture("images/0107.mp4")4
 
 # rtsp_url = "http://192.168.2.8:4747/video/1280x720"
 
